@@ -251,14 +251,15 @@ end
     if verbose
       fprintf('  saved %s \n', alphaFC3BscanCutSaveLoc)
     end
-    alphaFC3EnfaceCutSaveLoc = ...
-      fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedEnface.tif')
+    alphaFC3Enface
     save3DMatrixAsTiffRGB(...
       permute(maskSNR .* alphaFC3(:, :, :, tauDiff), [3 2 1]), ...
-      alphaFC3EnfaceCutSaveLoc, [0 1], angioMap, ...
+      fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedEnface.tif'), ...
+      [0 1], angioMap, ...
       [nY * displayDaspect(2) / displayDaspect(3), nX, nZ], 'linear')
+
     if verbose
-      fprintf('  saved %s \n', alphaFC3EnfaceCutSaveLoc)
+      fprintf('  saved %s \n', fullfile(saveFolder, 'alphaFC3_Enface.tif'))
       fprintf('FC2 and FC3 OCTA volumes export complete! \n')
     end
 
