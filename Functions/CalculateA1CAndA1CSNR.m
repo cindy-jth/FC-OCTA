@@ -1,5 +1,5 @@
-function [alphaFC2, alphaFC3] = CalculateFC2AndFC3(tom, ensembleWindow, noiseFloorZ, tauVec)
-% CALCULATEFC2ANDFC3 calculate OCTA volumes using FC2 and FC3 metrics
+function [alphaA1C, alphaA1CSNR] = CalculateA1CAndA1CSNR(tom, ensembleWindow, noiseFloorZ, tauVec)
+% CALCULATEA1CANDA1CSNR calculate OCTA volumes using A1C and A1CSNR metrics
 % ------------------------------------------------------------------------
 % Authors:  Tianhui (Cindy) Jie
 %
@@ -26,8 +26,8 @@ arguments (Input)
 end
 
 arguments (Output)
-  alphaFC2  % OCTA volume based on FC2: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
-  alphaFC3  % OCTA volume based on FC3: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
+  alphaA1C  % OCTA volume based on A1C: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
+  alphaA1CSNR  % OCTA volume based on A1CSNR: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
 end
 
   [nZ, ~, nX, nY, ~] = size(tom);
@@ -36,10 +36,10 @@ end
   [fracG1, ~, fracG1SNR] = CalcArbitraryEnsembleAveragedG1(tom, ...
     tauVec, ensembleWindow, noiseFloorZ, false, 5);
   
-  alphaFC2 = max(0, real(sqrt(1 - abs(fracG1))));
-  alphaFC2 = permute(reshape(alphaFC2, [nZ, nTaus, nX, nY]), [1 3 4 2]);
+  alphaA1C = max(0, real(sqrt(1 - abs(fracG1))));
+  alphaA1C = permute(reshape(alphaA1C, [nZ, nTaus, nX, nY]), [1 3 4 2]);
 
-  alphaFC3 = max(0, real(sqrt(1 - abs(fracG1SNR))));
-  alphaFC3 = permute(reshape(alphaFC3, [nZ, nTaus, nX, nY]), [1 3 4 2]);
+  alphaA1CSNR = max(0, real(sqrt(1 - abs(fracG1SNR))));
+  alphaA1CSNR = permute(reshape(alphaA1CSNR, [nZ, nTaus, nX, nY]), [1 3 4 2]);
 
 end

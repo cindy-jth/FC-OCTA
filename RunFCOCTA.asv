@@ -1,12 +1,29 @@
-function [alphaFC2, maskSNR, alphaFC3] = RunFCOCTA( ...
+function [alphaFC2, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
   tomFileLoc, backgroundFileLoc, nPolChs, nReps, zNoiseBackground, ...
   zEnsembleWindowHalfSize, zEnsembleWindowExp2Diameter, ...
   xEnsembleWindowHalfSize, xEnsembleWindowExp2Diameter, ...
   yEnsembleWindowHalfSize, yEnsembleWindowExp2Diameter, ...
   displayDaspect, angioMap, saveFolder, tauDiff, verbose)
-%RUNFCOCTA process complex-valued reconstructed raw OCT tomogram
-%(irrespective of phase stability) with fully coherent methods to produce
-%OCTA volumes
+% RUNFCOCTA process complex-valued reconstructed raw OCT tomogram
+% (irrespective of phase stability) with fully coherent methods to produce
+% OCTA volumes (and optionally export the volumes to TIFF stacks)
+% ------------------------------------------------------------------------
+% Authors:  Tianhui (Cindy) Jie
+%
+% TJ: 
+% 1. Massachusetts Institute of Technology, 
+%    Institute for Medical Engineering and Sciences, Boston, MA, USA
+% 2. Wellman Center for Photomedicine, Harvard Medical School, 
+%    Massachusetts General Hospital, Boston, MA, USA;
+% <tjie@mit.edu>
+%
+% FC-OCTA (v1.0)
+%
+% Changelog:
+%
+% 1.0 (2026-01-16): Initial version released
+%
+% Copyright Tianhui (Cindy) Jie (2026)
 
 arguments (Input)
   tomFileLoc (1, 1) string                   % file location of raw tomogram
@@ -14,23 +31,23 @@ arguments (Input)
   nPolChs (1, 1) double                      % number of polarization channels
   nReps (1, 1) double                        % number of B-scan repetitions
   zNoiseBackground (1, :) double             % z ROI above tissue in raw tomogram
-  zEnsembleWindowHalfSize (1, 1) double      % 2*(this)+1 = z
-  zEnsembleWindowExp2Diameter (1, 1) double  %
-  xEnsembleWindowHalfSize (1, 1) double      %
-  xEnsembleWindowExp2Diameter (1, 1) double  %
-  yEnsembleWindowHalfSize (1, 1) double      %
-  yEnsembleWindowExp2Diameter (1, 1) double  %
-  displayDaspect (1, 3) double               %
-  angioMap (256, 3) double                   %
-  saveFolder (1, 1) string                   %
-  tauDiff (1, 1) double = 1                  % 
+  zEnsembleWindowHalfSize (1, 1) double      % 2*(this)+1 = z averaging window size
+  zEnsembleWindowExp2Diameter (1, 1) double  % exp(-2)-diameter for z kernel shape
+  xEnsembleWindowHalfSize (1, 1) double      % 2*(this)+1 = x averaging window size
+  xEnsembleWindowExp2Diameter (1, 1) double  % exp(-2)-diameter for x kernel shape
+  yEnsembleWindowHalfSize (1, 1) double      % 2*(this)+1 = y averaging window size
+  yEnsembleWindowExp2Diameter (1, 1) double  % exp(-2)-diameter for y kernel shape
+  displayDaspect (1, 3) double               % daspect for export, size of each voxel
+  angioMap (256, 3) double                   % colormap for OCTA
+  saveFolder (1, 1) string                   % file location to save TIFF stacks
+  tauDiff (1, 1) double = 1                  % B-scan step between repetitions used to calculate OCTA
   verbose (1, 1) logical = true              % (if true) print out progress markers 
 end
 
 arguments (Output)
-  alphaFC2
-  maskSNR
-  alphaFC3
+  alphaFC2  % OCTA volume based on FC2: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
+  maskSNR   % SNR mask calculated in FC-OCTA that is used on output TIFF stacks: 3D matrix [nZ, nX, nY]
+  alphaA1CSNR  % OCTA volume based on FC3: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
 end
   
   % --------------------------------------------------------------------
@@ -206,7 +223,7 @@ end
     fprintf('Starting FC2 and FC3 calculation... \n')
   end
   
-  [alphaFC2, alphaFC3] = CalculateFC2AndFC3( ...
+  [alphaFC2, alphaA1CSNR] = CalculateFC2AndFC3( ...
     tomPNCed, ensembleWindow, mean(noiseFloorZMCed, 2));
   clear tomPNCed
   
@@ -245,7 +262,7 @@ end
     alphaFC3BscanCutSaveLoc = ...
       fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedBscan.tif');
     save3DMatrixAsTiffRGB(...
-      maskSNR .* alphaFC3(:, :, :, tauDiff), ...
+      maskSNR .* alphaA1CSNR(:, :, :, tauDiff), ...
       alphaFC3BscanCutSaveLoc, [0 1], angioMap, ...
       [nZ * displayDaspect(1) / displayDaspect(2), nX, nY], 'linear')
     if verbose
@@ -254,7 +271,7 @@ end
     alphaFC3EnfaceCutSaveLoc = ...
       fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedEnface.tif')
     save3DMatrixAsTiffRGB(...
-      permute(maskSNR .* alphaFC3(:, :, :, tauDiff), [3 2 1]), ...
+      permute(maskSNR .* alphaA1CSNR(:, :, :, tauDiff), [3 2 1]), ...
       alphaFC3EnfaceCutSaveLoc, [0 1], angioMap, ...
       [nY * displayDaspect(2) / displayDaspect(3), nX, nZ], 'linear')
     if verbose
