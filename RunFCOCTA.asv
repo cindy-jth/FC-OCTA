@@ -14,7 +14,7 @@ arguments (Input)
   nPolChs (1, 1) double                      % number of polarization channels
   nReps (1, 1) double                        % number of B-scan repetitions
   zNoiseBackground (1, :) double             % z ROI above tissue in raw tomogram
-  zEnsembleWindowHalfSize (1, 1) double      % 
+  zEnsembleWindowHalfSize (1, 1) double      % 2*(this)+1 = z
   zEnsembleWindowExp2Diameter (1, 1) double  %
   xEnsembleWindowHalfSize (1, 1) double      %
   xEnsembleWindowExp2Diameter (1, 1) double  %
@@ -23,8 +23,8 @@ arguments (Input)
   displayDaspect (1, 3) double               %
   angioMap (256, 3) double                   %
   saveFolder (1, 1) string                   %
-  tauDiff (1, 1) double = 1                  %
-  verbose (1, 1) logical = true              % 
+  tauDiff (1, 1) double = 1                  % 
+  verbose (1, 1) logical = true              % (if true) print out progress markers 
 end
 
 arguments (Output)
@@ -251,15 +251,14 @@ end
     if verbose
       fprintf('  saved %s \n', alphaFC3BscanCutSaveLoc)
     end
-    alphaFC3Enface
+    alphaFC3EnfaceCutSaveLoc = ...
+      fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedEnface.tif')
     save3DMatrixAsTiffRGB(...
       permute(maskSNR .* alphaFC3(:, :, :, tauDiff), [3 2 1]), ...
-      fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedEnface.tif'), ...
-      [0 1], angioMap, ...
+      alphaFC3EnfaceCutSaveLoc, [0 1], angioMap, ...
       [nY * displayDaspect(2) / displayDaspect(3), nX, nZ], 'linear')
-
     if verbose
-      fprintf('  saved %s \n', fullfile(saveFolder, 'alphaFC3_Enface.tif'))
+      fprintf('  saved %s \n', alphaFC3EnfaceCutSaveLoc)
       fprintf('FC2 and FC3 OCTA volumes export complete! \n')
     end
 

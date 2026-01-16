@@ -1,5 +1,34 @@
 function [tomFixed] = ApplyGeneralAlinePhaseJitterCorrection(...
     tomCorrupt, zROI, noiseFloorDb, polAverage, varargin)
+% APPLYGENERALALINEPHASEJITTERCORRECTION remove phase noise differences
+% between A-lines
+% ------------------------------------------------------------------------
+% Authors:  Tianhui (Cindy) Jie, Sebastián Ruiz-Lopera, Néstor Uribe-Patarroyo
+%
+% TJ: 
+% 1. Massachusetts Institute of Technology, 
+%    Institute for Medical Engineering and Sciences, Boston, MA, USA
+% 2. Wellman Center for Photomedicine, Harvard Medical School, 
+%    Massachusetts General Hospital, Boston, MA, USA;
+% <tjie@mit.edu>
+% SRL:
+% 1. Massachusetts Institute of Technology, 
+%    Department of Electrical Engineering and Computer Science, Boston, MA, USA
+% 2. Wellman Center for Photomedicine, Harvard Medical School, 
+%    Massachusetts General Hospital, Boston, MA, USA;
+% NUP: 
+% 1. Massachusetts Institute of Technology, 
+%    Institute for Medical Engineering and Sciences, Boston, MA, USA
+% 2. Wellman Center for Photomedicine, Harvard Medical School, 
+%    Massachusetts General Hospital, Boston, MA, USA;
+%
+% FC-OCTA (v1.0)
+%
+% Changelog:
+%
+% 1.0 (2026-01-16): Initial version released
+%
+% Copyright Tianhui (Cindy) Jie, Sebastián Ruiz-Lopera, Néstor Uribe-Patarroyo (2026)
   
   % polDim is an optional argument
   if nargin > 4
