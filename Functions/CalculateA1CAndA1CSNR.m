@@ -5,7 +5,7 @@ function [alphaA1C, alphaA1CSNR] = CalculateA1CAndA1CSNR(tom, ensembleWindow, no
 %
 % TJ: 
 % 1. Massachusetts Institute of Technology, 
-%    Institute for Medical Engineering and Sciences, Boston, MA, USA
+%    Institute for Medical Engineering and Sciences, Cambridge, MA, USA;
 % 2. Wellman Center for Photomedicine, Harvard Medical School, 
 %    Massachusetts General Hospital, Boston, MA, USA;
 % <tjie@mit.edu>

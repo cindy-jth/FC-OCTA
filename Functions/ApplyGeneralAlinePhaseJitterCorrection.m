@@ -7,18 +7,18 @@ function [tomFixed] = ApplyGeneralAlinePhaseJitterCorrection(...
 %
 % TJ: 
 % 1. Massachusetts Institute of Technology, 
-%    Institute for Medical Engineering and Sciences, Boston, MA, USA
+%    Institute for Medical Engineering and Sciences, Cambridge, MA, USA;
 % 2. Wellman Center for Photomedicine, Harvard Medical School, 
 %    Massachusetts General Hospital, Boston, MA, USA;
 % <tjie@mit.edu>
 % SRL:
 % 1. Massachusetts Institute of Technology, 
-%    Department of Electrical Engineering and Computer Science, Boston, MA, USA
+%    Department of Electrical Engineering and Computer Science, Cambridge, MA, USA;
 % 2. Wellman Center for Photomedicine, Harvard Medical School, 
 %    Massachusetts General Hospital, Boston, MA, USA;
 % NUP: 
 % 1. Massachusetts Institute of Technology, 
-%    Institute for Medical Engineering and Sciences, Boston, MA, USA
+%    Institute for Medical Engineering and Sciences, Cambridge, MA, USA;
 % 2. Wellman Center for Photomedicine, Harvard Medical School, 
 %    Massachusetts General Hospital, Boston, MA, USA;
 %
