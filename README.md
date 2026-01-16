@@ -10,7 +10,9 @@ Read the open-access publication in BOE [1].
 
 # Contact
 
-Tianhui (Cindy) Jie, Wellman Center for Photomedicine, Harvard Medical School, Boston, MA. tjie@mit.edu
+Tianhui (Cindy) Jie: tjie@mit.edu
+1. Massachusetts Institute of Technology, Institute for Medical Engineering and Sciences, Cambridge, MA.
+2. Wellman Center for Photomedicine, Harvard Medical School, Massachusetts General Hospital, Boston, MA.
 
 # Version
 
