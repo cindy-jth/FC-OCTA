@@ -5,8 +5,8 @@ Read the open-access publication in BOE [1].
 
 # Instructions
 
-- **Running the code on sample data:** Download `SampleData.zip` (1.82 GB) from Figshare [2] and place the `SampleData` folder inside the `FC-OCTA` directory on the same level as `GuidedRunFCOCTA.mlx`. Then you can follow the document for a guided use of FC-OCTA to produce OCTA volumes using FC<sub>2</sub> and FC<sub>3</sub>.
-- **Running the code on your own data:** To process your own data with FC<sub>2</sub> and FC<sub>3</sub>, you can use the script `GuidedRunFCOCTA.mlx` and follow the instructions in the document. Alternatively, you can directly embed the function `RunFCOCTA.m` into your workflow.
+- **Running the code on sample data:** Download `SampleData.zip` (1.82 GB) from Figshare [2] and place the `SampleData` folder inside the `FC-OCTA` directory on the same level as `GuidedRunFCOCTA.mlx`. Then you can follow the document for a guided use of **FC-OCTA** to produce OCTA volumes using **A1C** and **A1CSNR**.
+- **Running the code on your own data:** To process your own data with **FC-OCTA** and metrics **A1C** and **A1CSNR**, you can use the script `GuidedRunFCOCTA.mlx` and follow the instructions in the document. Alternatively, you can directly embed the function `RunFCOCTA.m` into your workflow.
 
 # Contact
 
