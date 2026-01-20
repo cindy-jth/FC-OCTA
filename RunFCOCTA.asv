@@ -1,5 +1,5 @@
-function [alphaFC2, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
-  tomFileLoc, backgroundFileLoc, nPolChs, nReps, zNoiseBackground, ...
+function [alphaA1C, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
+  tomInput, backgroundInput, nPolChs, nReps, zNoiseBackground, ...
   zEnsembleWindowHalfSize, zEnsembleWindowExp2Diameter, ...
   xEnsembleWindowHalfSize, xEnsembleWindowExp2Diameter, ...
   yEnsembleWindowHalfSize, yEnsembleWindowExp2Diameter, ...
@@ -12,7 +12,7 @@ function [alphaFC2, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
 %
 % TJ: 
 % 1. Massachusetts Institute of Technology, 
-%    Institute for Medical Engineering and Sciences, Boston, MA, USA
+%    Institute for Medical Engineering and Sciences, Cambridge, MA, USA;
 % 2. Wellman Center for Photomedicine, Harvard Medical School, 
 %    Massachusetts General Hospital, Boston, MA, USA;
 % <tjie@mit.edu>
@@ -26,8 +26,8 @@ function [alphaFC2, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
 % Copyright Tianhui (Cindy) Jie (2026)
 
 arguments (Input)
-  tomFileLoc (1, 1) string                   % file location of raw tomogram
-  backgroundFileLoc (1, 1) string            % file location of background measurement
+  tomInput (1, 1) {eitherFileLocOr4DTom}         % file location of raw tomogram, OR 4D matrix of raw tomogram
+  backgroundInput (1, 1) {eitherFileLocOr4DTom}  % file location of background measurement, OR 4D matrix of background measurement
   nPolChs (1, 1) double                      % number of polarization channels
   nReps (1, 1) double                        % number of B-scan repetitions
   zNoiseBackground (1, :) double             % z ROI above tissue in raw tomogram
@@ -45,9 +45,9 @@ arguments (Input)
 end
 
 arguments (Output)
-  alphaFC2  % OCTA volume based on FC2: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
+  alphaA1C  % OCTA volume based on A1C: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
   maskSNR   % SNR mask calculated in FC-OCTA that is used on output TIFF stacks: 3D matrix [nZ, nX, nY]
-  alphaA1CSNR  % OCTA volume based on FC3: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
+  alphaA1CSNR  % OCTA volume based on A1CSNR: 4D matrix [nZ (depth), nX (slow axis), nY (fast axis), nReps-1 (all combos of tauDiff)]
 end
   
   % --------------------------------------------------------------------
@@ -57,8 +57,12 @@ end
     fprintf('Loading your dataset for FC-OCTA processing... \n')
   end
   
-  tomFile = struct2cell(load(tomFileLoc));
-  tom = tomFile{1};
+  if isstring(tomInput) || ischar(tomInput)
+    tomFile = struct2cell(load(tomInput));
+    tom = tomFile{1};
+  elseif isnumeric(tomInput) && ndims(tomInput) == 4
+    tom = tomInput;
+  end
   [nZ, nX, nBscans, ~] = size(tom);
   nY = nBscans / nReps;
   if verbose 
@@ -66,7 +70,7 @@ end
              '  %d repetition(s), %d polarization channel(s). \n'], ...
             nZ, nX, nY, nReps, nPolChs)
   end
-  
+
   % --------------------------------------------------------------------
   % Determine depth-dependent and approximate noise floors
   % --------------------------------------------------------------------
@@ -74,7 +78,7 @@ end
     fprintf('Starting noise floor determination... \n')
   end
   
-  backgroundFile = struct2cell(load(backgroundFileLoc));
+  backgroundFile = struct2cell(load(backgroundInput));
   background = backgroundFile{1};
   backgroundInt = mean(abs(background) .^ 2, [2 3]);
   
@@ -217,68 +221,78 @@ end
   end
   
   % --------------------------------------------------------------------
-  % Calculate FC2 and FC3
+  % Calculate A1C and A1CSNR
   % --------------------------------------------------------------------
   if verbose
-    fprintf('Starting FC2 and FC3 calculation... \n')
+    fprintf('Starting A1C and A1CSNR calculation... \n')
   end
   
-  [alphaFC2, alphaA1CSNR] = CalculateFC2AndFC3( ...
+  [alphaA1C, alphaA1CSNR] = CalculateA1CAndA1CSNR( ...
     tomPNCed, ensembleWindow, mean(noiseFloorZMCed, 2));
   clear tomPNCed
   
   if verbose
-    fprintf('  "tomPNCed" cleared -> "alphaFC2" + "alphaFC3" \n')
-    fprintf('Calculation of FC2 and FC3 complete! \n')
+    fprintf('  "tomPNCed" cleared -> "alphaA1C" + "alphaA1CSNR" \n')
+    fprintf('Calculation of A1C and A1CSNR complete! \n')
   end
 
   % --------------------------------------------------------------------
-  % Export FC2 and FC3 as TIFF stacks (optional)
+  % Export A1C and A1CSNR as TIFF stacks (optional)
   % --------------------------------------------------------------------
   if ~(saveFolder == "")
 
     if verbose
-      fprintf('Exporting FC2 and FC3 OCTA volumes as TIFF stacks... \n')
+      fprintf('Exporting A1C-based and A1CSNR-based OCTA volumes as TIFF stacks... \n')
     end
 
-    alphaFC2BscanCutSaveLoc = ...
-      fullfile(saveFolder, 'alphaFC2_t' + string(tauDiff) + '_SNRMaskedBscan.tif');
+    alphaA1CBscanCutSaveLoc = ...
+      fullfile(saveFolder, 'alphaA1C_t' + string(tauDiff) + '_SNRMaskedBscan.tif');
     save3DMatrixAsTiffRGB(...
-      maskSNR .* alphaFC2(:, :, :, tauDiff), ...
-      alphaFC2BscanCutSaveLoc, [0 1], angioMap, ...
+      maskSNR .* alphaA1C(:, :, :, tauDiff), ...
+      alphaA1CBscanCutSaveLoc, [0 1], angioMap, ...
       [nZ * displayDaspect(1) / displayDaspect(2), nX, nY], 'linear')
     if verbose
-      fprintf('  saved %s \n', alphaFC2BscanCutSaveLoc)
+      fprintf('  saved %s \n', alphaA1CBscanCutSaveLoc)
     end
-    alphaFC2EnfaceCutSaveLoc = ...
-      fullfile(saveFolder, 'alphaFC2_t' + string(tauDiff) + '_SNRMaskedEnface.tif');
+    alphaA1CEnfaceCutSaveLoc = ...
+      fullfile(saveFolder, 'alphaA1C_t' + string(tauDiff) + '_SNRMaskedEnface.tif');
     save3DMatrixAsTiffRGB(...
-      permute(maskSNR .* alphaFC2(:, :, :, tauDiff), [3 2 1]), ...
-      alphaFC2EnfaceCutSaveLoc, [0 1], angioMap, ...
+      permute(maskSNR .* alphaA1C(:, :, :, tauDiff), [3 2 1]), ...
+      alphaA1CEnfaceCutSaveLoc, [0 1], angioMap, ...
       [nY * displayDaspect(2) / displayDaspect(3), nX, nZ], 'linear')
     if verbose
-      fprintf('  saved %s \n', alphaFC2EnfaceCutSaveLoc)
+      fprintf('  saved %s \n', alphaA1CEnfaceCutSaveLoc)
     end
-    alphaFC3BscanCutSaveLoc = ...
-      fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedBscan.tif');
+    alphaA1CSNRBscanCutSaveLoc = ...
+      fullfile(saveFolder, 'alphaA1CSNR_t' + string(tauDiff) + '_SNRMaskedBscan.tif');
     save3DMatrixAsTiffRGB(...
       maskSNR .* alphaA1CSNR(:, :, :, tauDiff), ...
-      alphaFC3BscanCutSaveLoc, [0 1], angioMap, ...
+      alphaA1CSNRBscanCutSaveLoc, [0 1], angioMap, ...
       [nZ * displayDaspect(1) / displayDaspect(2), nX, nY], 'linear')
     if verbose
-      fprintf('  saved %s \n', alphaFC3BscanCutSaveLoc)
+      fprintf('  saved %s \n', alphaA1CSNRBscanCutSaveLoc)
     end
-    alphaFC3EnfaceCutSaveLoc = ...
-      fullfile(saveFolder, 'alphaFC3_t' + string(tauDiff) + '_SNRMaskedEnface.tif')
+    alphaA1CSNREnfaceCutSaveLoc = ...
+      fullfile(saveFolder, 'alphaA1CSNR_t' + string(tauDiff) + '_SNRMaskedEnface.tif');
     save3DMatrixAsTiffRGB(...
       permute(maskSNR .* alphaA1CSNR(:, :, :, tauDiff), [3 2 1]), ...
-      alphaFC3EnfaceCutSaveLoc, [0 1], angioMap, ...
+      alphaA1CSNREnfaceCutSaveLoc, [0 1], angioMap, ...
       [nY * displayDaspect(2) / displayDaspect(3), nX, nZ], 'linear')
     if verbose
-      fprintf('  saved %s \n', alphaFC3EnfaceCutSaveLoc)
-      fprintf('FC2 and FC3 OCTA volumes export complete! \n')
+      fprintf('  saved %s \n', alphaA1CSNREnfaceCutSaveLoc)
+      fprintf('A1C-based and A1CSNR-based OCTA volumes export complete! \n')
     end
 
   end
 
+end
+
+% enforce the input type that FC-OCTA will be running on
+function eitherFileLocOr4DTom(input)
+  if isstring(input) || ischar(input)
+    return
+  elseif isnumeric(input) && ndims(input) == 4
+    return
+  end
+  error("Input must be a string/char OR a 4D numeric matrix.")
 end

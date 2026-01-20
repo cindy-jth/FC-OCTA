@@ -1,5 +1,5 @@
 function [alphaA1C, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
-  tomFileLoc, backgroundFileLoc, nPolChs, nReps, zNoiseBackground, ...
+  tomInput, backgroundInput, nPolChs, nReps, zNoiseBackground, ...
   zEnsembleWindowHalfSize, zEnsembleWindowExp2Diameter, ...
   xEnsembleWindowHalfSize, xEnsembleWindowExp2Diameter, ...
   yEnsembleWindowHalfSize, yEnsembleWindowExp2Diameter, ...
@@ -26,8 +26,8 @@ function [alphaA1C, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
 % Copyright Tianhui (Cindy) Jie (2026)
 
 arguments (Input)
-  tomFileLoc (1, 1) string                   % file location of raw tomogram
-  backgroundFileLoc (1, 1) string            % file location of background measurement
+  tomInput (1, 1) {eitherFileLocOr4DTom}         % file location of raw tomogram, OR 4D matrix of raw tomogram
+  backgroundInput (1, 1) {eitherFileLocOr4DTom}  % file location of background measurement, OR 4D matrix of background measurement
   nPolChs (1, 1) double                      % number of polarization channels
   nReps (1, 1) double                        % number of B-scan repetitions
   zNoiseBackground (1, :) double             % z ROI above tissue in raw tomogram
@@ -57,8 +57,12 @@ end
     fprintf('Loading your dataset for FC-OCTA processing... \n')
   end
   
-  tomFile = struct2cell(load(tomFileLoc));
-  tom = tomFile{1};
+  if isstring(tomInput) || ischar(tomInput)
+    tomFile = struct2cell(load(tomInput));
+    tom = tomFile{1};
+  elseif isnumeric(tomInput) && ndims(tomInput) == 4
+    tom = tomInput;
+  end
   [nZ, nX, nBscans, ~] = size(tom);
   nY = nBscans / nReps;
   if verbose 
@@ -66,7 +70,7 @@ end
              '  %d repetition(s), %d polarization channel(s). \n'], ...
             nZ, nX, nY, nReps, nPolChs)
   end
-  
+
   % --------------------------------------------------------------------
   % Determine depth-dependent and approximate noise floors
   % --------------------------------------------------------------------
@@ -74,8 +78,12 @@ end
     fprintf('Starting noise floor determination... \n')
   end
   
-  backgroundFile = struct2cell(load(backgroundFileLoc));
-  background = backgroundFile{1};
+  if isstring(backgroundInput) || ischar(backgroundInput)
+    backgroundFile = struct2cell(load(backgroundInput));
+    background = backgroundFile{1};
+  elseif isnumeric(backgroundInput) && ndims(backgroundInput) == 4
+    background = backgroundInput;
+  end
   backgroundInt = mean(abs(background) .^ 2, [2 3]);
   
   % Remove weird peaks
@@ -281,4 +289,14 @@ end
 
   end
 
+end
+
+% enforce the input type that FC-OCTA will be running on
+function eitherFileLocOr4DTom(input)
+  if isstring(input) || ischar(input)
+    return
+  elseif isnumeric(input) && ndims(input) == 4
+    return
+  end
+  error("Input must be a string/char OR a 4D numeric matrix.")
 end
