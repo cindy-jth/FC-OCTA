@@ -26,8 +26,8 @@ function [alphaA1C, maskSNR, alphaA1CSNR] = RunFCOCTA( ...
 % Copyright Tianhui (Cindy) Jie (2026)
 
 arguments (Input)
-  tomInput (1, 1) {eitherFileLocOr4DTom}         % file location of raw tomogram, OR 4D matrix of raw tomogram
-  backgroundInput (1, 1) {eitherFileLocOr4DTom}  % file location of background measurement, OR 4D matrix of background measurement
+  tomInput {eitherFileLocOr4DTom}            % file location of raw tomogram, OR 4D matrix of raw tomogram
+  backgroundInput {eitherFileLocOr4DTom}     % file location of background measurement, OR 4D matrix of background measurement
   nPolChs (1, 1) double                      % number of polarization channels
   nReps (1, 1) double                        % number of B-scan repetitions
   zNoiseBackground (1, :) double             % z ROI above tissue in raw tomogram
