@@ -20,4 +20,4 @@ Tianhui (Cindy) Jie: tjie@mit.edu
 
 [1] BOE DOI link
 
-[2] https://doi.org/10.6084/m9.figshare.30334420
+[2] [https://opticapublishing.figshare.com/s/783aecac5cc876b2ec10](https://opticapublishing.figshare.com/s/783aecac5cc876b2ec10)
