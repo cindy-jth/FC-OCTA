@@ -1,5 +1,5 @@
 # FC-OCTA
-Phase-noise tolerant first-order autocorrelation based optical coherence tomography angiography
+Phase-noise tolerant fully-coherent optical coherence tomography angiography for high-contrast 3D microvasculature mapping
 
 Read the open-access publication in BOE [1].
 
