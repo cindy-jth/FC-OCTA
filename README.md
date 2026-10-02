@@ -1,7 +1,7 @@
 # FC-OCTA
 Phase-noise tolerant fully-coherent optical coherence tomography angiography for high-contrast 3D microvasculature mapping
 
-The manuscript is currently under review. In the meantime, please see the open-access preprint available on bioRxiv [1]. Check back for the DOI once the peer-reviewed article is published.
+The manuscript is currently under review. In the meantime, please see the open-access preprint available on BioRXiv [1]. Check back for the DOI once the peer-reviewed article is published.
 
 # Instructions
 
